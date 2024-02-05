@@ -24,6 +24,7 @@ def create_model(
     arch: str,
     encoder_name: str = "resnet34",
     encoder_weights: _Optional[str] = "imagenet",
+    num_freeze_layers: _Optional[int] = None,
     in_channels: int = 3,
     classes: int = 1,
     **kwargs,
@@ -53,10 +54,27 @@ def create_model(
                 list(archs_dict.keys()),
             )
         )
-    return model_class(
+
+    # Create the model
+    model = model_class(
         encoder_name=encoder_name,
         encoder_weights=encoder_weights,
         in_channels=in_channels,
         classes=classes,
         **kwargs,
     )
+
+    # Decide which layers to freeze based on the freeze_layers parameter
+    if num_freeze_layers is not None:
+        if num_freeze_layers < 0 or num_freeze_layers > len(list(model.encoder.children())):
+            raise ValueError("Invalid value for freeze_layers.")
+        
+        # Freeze the specified number of layers
+        for i, param in enumerate(model.encoder.parameters()):
+            if i < num_freeze_layers:
+                param.requires_grad = False
+            else:
+                break
+
+    return model
+
