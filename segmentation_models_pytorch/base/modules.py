@@ -104,12 +104,14 @@ class Activation(nn.Module):
             self.activation = ArgMax(dim=1, **params)
         elif name == "clamp":
             self.activation = Clamp(**params)
+        elif name == "relu":
+            self.activation = nn.ReLU(**params)
         elif callable(name):
             self.activation = name(**params)
         else:
             raise ValueError(
                 f"Activation should be callable/sigmoid/softmax/logsoftmax/tanh/"
-                f"argmax/argmax2d/clamp/None; got {name}"
+                f"argmax/argmax2d/clamp/relu/None; got {name}"
             )
 
     def forward(self, x):
